@@ -1,219 +1,227 @@
-INFORMATION GATHERING:
+# Passive Information Gathering
+---
 
-Passive information gathering
+## Summary
+Passive information gathering (OSINT) collects data about a target without direct interaction with its systems — using public sources, archives, certificate transparency, WHOIS, DNS history, search engines and third-party services. It is non-intrusive and should be the first step in any engagement.
 
--FOOTPRINTING
+---
 
-In the terminal, use the host command along with the URL to perform a DNS lookup (to find the IP address).
+## Contents
+1. Footprinting & site discovery  
+2. WHOIS enumeration  
+3. DNS reconnaissance (passive)  
+4. Technology and stack discovery (BuiltWith, Wappalyzer, WhatWeb)  
+5. Subdomain enumeration & Google Dorks  
+6. Email harvesting (theHarvester)  
+7. WAF detection (WafW00f)  
+8. Tools, commands & cheat sheet  
 
-To gather information about a website, it’s useful to check the /robots.txt file. This file indicates which parts of the site the site owner doesn’t want search engines to index.
+---
 
-Another useful file is sitemap.xml. This file provides search engines with a structured map of the website to help them index it more efficiently.
+## 1) Footprinting & site discovery
 
-Browser Plugins:
+**Concept**  
+Footprinting gathers high-level information about a target: domains, hosts, site structure, sitemap and robots directives.
 
-For Mozilla Firefox, the plugin BuiltWith is a technology profiler that shows what technologies or content management systems a website is running.
+**Useful files on websites**
+- `/robots.txt` — lists paths disallowed for crawlers; can reveal hidden directories.
+- `/sitemap.xml` — structured map of publicly indexable URLs.
 
-Another popular plugin is Wappalyzer, which also identifies technologies used by websites.
+**Examples**
+```bash
+# View robots.txt
+curl -s https://example.com/robots.txt
 
+# Download sitemap.xml
+curl -s https://example.com/sitemap.xml | xmllint --format -
+```
 
-In the terminal, you can use the tool WhatWeb to identify technologies running on a website.
+**Full site download**
+- `HTTrack` can mirror a site locally:
+  - Website: https://www.httrack.com/
 
-You can download an entire website using the tool available at httrack.com.
+**Browser plugins**
+- **BuiltWith** (Firefox/Chrome): technology profiler.  
+- **Wappalyzer**: identifies frameworks, CMS, analytics, libraries.
 
+**Terminal tool**
+- `WhatWeb` — technology discovery:
+```bash
+whatweb https://example.com
+```
 
+---
 
+## 2) WHOIS enumeration
 
-WHOIS ENUMERATION
+**Concept**  
+WHOIS reveals domain registration metadata: registrar, registration/expiry dates, registrant contacts, and sometimes technical contacts. For IP queries, WHOIS shows netblock allocation and organization.
 
-This process involves identifying when a domain was registered, who owns it, and which registrar was used.
-
-Running a Whois query in the terminal provides detailed information about the domain or website, such as registration date, owner contact details, registrar name, and domain status.
-
-When querying an IP address or a range of IPs, Whois returns information including the network range, CIDR notation of the subnet, organization name, and contact information.
-
-
-Common Tools and Commands:
-
-Terminal Command:
-
+**Commands**
+```bash
+# Domain WHOIS
 whois example.com
 
-Returns detailed domain registration info.
+# IP WHOIS
+whois 192.0.2.1
+```
 
-For IP addresses:
+**Web services**
+- whois.domaintools.com  
+- who.is
 
-whois 192.168.1.1
+**Automated frameworks**
+- `theHarvester` — gathers WHOIS and other OSINT data.  
+- `Recon-ng` — modular framework with WHOIS and other OSINT modules.
 
-Shows network allocation, ISP, and organization details.
+**Notes**
+- Some registrars redact personal data (GDPR/privacy protection). Try registrar-specific WHOIS or RDAP for structured data.
 
-Online Whois services:
+---
 
-whois.domaintools.com
+## 3) DNS reconnaissance (passive)
 
-who.is
+**Concept**  
+Passive DNS collects historical and current DNS records from third-party sources (DNS archives, DNSDB), revealing subdomains, mail servers, name servers, and TXT records without querying the target's authoritative servers directly.
 
+**Common record types**
+- `NS`, `A`, `AAAA`, `MX`, `CNAME`, `TXT`
 
-Automated enumeration tools:
-
-theHarvester: Gathers Whois info among other OSINT data.
-
-Recon-ng: Modular framework with Whois lookup modules.
-
-
-
-
-FOOTPRINTING WITH NETCRAFT.COM
-
-Netcraft.com provides detailed information about a website, including its background, network details, SSL/TLS certificates, and web technologies used.
-
-It shows information about IP delegation, certificate transparency logs, and name servers.
-
-The tool can also identify if the site is vulnerable to SSL/TLS-related issues.
-
-Important details include the validity period of the SSL/TLS certificate, who issued it, and the issuer’s country.
-
-Web Trackers:
-Netcraft reveals which analytics systems or trackers are currently active on the website.
-
-Site Technology:
-It identifies proxy servers in use on the server side and what technologies are running on the site.
-
-
-Example of usage:
-
-Visit https://www.netcraft.com/.
-
-Enter the target domain in the search bar (e.g., example.com).
-
-Review the report sections for SSL/TLS certificate details, network information, and technology profile.
-
-Use this information to assess the site's infrastructure, security posture, and tracking technologies.
-
-
-
-
-DNS RECONNAISSANCE (PASSIVE)
-
-Passive DNS reconnaissance focuses on identifying DNS records related to a specific domain. This includes records such as mail servers, IP addresses, TXT records, and others.
-
-The goal is to gain a better understanding of how the target website or system is configured and how its infrastructure is organized.
-
-Common DNS Record Types:
-
-NS (Name Server): The authoritative DNS servers for the domain.
-
-A Record: Maps the domain to its IPv4 address.
-
-AAAA Record: Maps the domain to its IPv6 address.
-
-MX Record: Specifies the mail servers used for handling email for the domain.
-
-TXT Record: Holds text data used for verification, diagnostics, and policies like SPF, DKIM, etc.
-
-
-Terminal Tool: dnsrecon
-
-Command format:
-
+**Tools & services**
+```bash
+# dnsrecon (passive & active options)
 dnsrecon -d example.com
 
-This command passively enumerates DNS records for the specified domain.
+# Online passive DNS / mapping
+dnsdumpster.com
+securitytrails.com (commercial)
+virustotal.com (passive DNS via API)
+```
 
+**Notes**
+- Passive DNS sources may show historical records and related domains. Use them to expand subdomain lists and identify third-party infrastructure.
 
-Web-based Tool: dnsdumpster.com
+---
 
-A free online resource that performs the same type of reconnaissance.
+## 4) Technology & stack discovery
 
-It provides a well-organized report including subdomains, DNS records, and host mapping.
+**Browser-based**
+- BuiltWith, Wappalyzer: quick overview of CMS, server, analytics and libraries.
 
+**Command-line**
+- `WhatWeb` — fingerprints web server and technologies.
+```bash
+whatweb https://example.com
+```
 
+**Netcraft**
+- Web-based reports: SSL/TLS, hosting history, technologies, trackers.
+- Visit https://www.netcraft.com/ and search the domain.
 
+---
 
+## 5) Subdomain enumeration & Google Dorks
 
-DETECTING WEB APPLICATION FIREWALLS (WAF) WITH WAFW00F
+**Subdomain enumeration**
+- `Sublist3r` — OSINT-based subdomain discovery:
+```bash
+sublist3r -d example.com
+# specify engines:
+sublist3r -d example.com -e Google,Bing
+```
+- Also consider: `amass`, `assetfinder`, `crt.sh` (certificate transparency logs).
 
-A WAF (Web Application Firewall) is a security system that monitors and filters HTTP traffic between a web application and the internet. It is used to protect web applications from various attacks.
+**Google Dorks**
+- Use advanced search queries to find exposed content:
+```
+site:example.com inurl:admin
+intitle:"Index of"
+filetype:pdf site:*.example.com
+cache:example.com
+```
+- Google Hacking Database: https://www.exploit-db.com/google-hacking-database
 
-WAFW00F is a tool that helps detect the presence and type of WAF used by a website. It works by analyzing the HTTP responses and behaviors of the target website when specific requests are made.
+**Notes**
+- Combine multiple sources: CT logs, DNS archives, search engines, and web archives (Wayback Machine) to build a comprehensive list.
 
-Basic usage:
+---
 
-List all known WAFs:
+## 6) Email harvesting (theHarvester)
 
+**Purpose**
+- Gather email addresses and related subdomains from public sources (search engines, PGP keys, social media).
+
+**Example**
+```bash
+theHarvester -d example.com -b google,bing
+```
+
+**Sources**
+- google, bing, yahoo, baidu, pgp, linkedin, twitter, pastebin, etc.
+
+**Notes**
+- Verify harvested emails (don't send unsolicited emails). Treat as sensitive data.
+
+---
+
+## 7) WAF detection (WAFW00F)
+
+**Purpose**
+- Detect the presence/type of Web Application Firewalls by analyzing HTTP responses.
+
+**Commands**
+```bash
+# list known WAFs
 wafw00f -l
 
-Detect WAF:
-
+# detect WAF
 wafw00f https://example.com
 
-Verbose detection:
-
+# verbose
 wafw00f https://example.com -a
+```
 
+**Notes**
+- WAF detection helps plan later testing and evasion strategies (authorized only).
 
+---
 
+## 8) Tools, commands & cheat sheet
 
-SUBDOMAIN ENUMERATION WITH SUBLIST3R
+```bash
+# Footprinting / site files
+curl -s https://example.com/robots.txt
+curl -s https://example.com/sitemap.xml
 
-Sublist3r is a tool designed to enumerate subdomains of websites using OSINT.
+# Technology detection
+whatweb https://example.com
+# Browser: BuiltWith, Wappalyzer
 
-It helps penetration testers and bug bounty hunters collect and gather subdomains for the domain they are targeting.
+# WHOIS
+whois example.com
+whois 192.0.2.1
 
-Basic command:
-
+# Passive DNS / subdomain mapping
+dnsrecon -d example.com
+dnsdumpster.com
 sublist3r -d example.com
+amass enum -d example.com
+crt.sh
 
-This scans for subdomains of example.com
-
-To specify search engines:
-
-sublist3r -d example.com -e Google,Yahoo
-
-This command uses only Google and Yahoo for subdomain enumeration.
-
-Sublist3r gathers results using multiple search engines like Google, Bing, Yahoo, Netcraft, etc.
-
-
-
-GOOGLE DORKS
-
-Google Dorks are advanced search queries used to find information that is not easily accessible through normal searches.
-
-Examples:
-
-site:example.com inurl:admin
-
-Finds admin pages under example.com
-
-intitle:"Index of"
-
-Lists directory indexes exposed on the web
-
-filetype:pdf site:*.example.com
-
-Searches for PDF files under all subdomains of example.com
-
-cache:example.com
-
-Shows the cached version of the page
-
-More dorks:
-
-exploit-db.com/google-hacking-database
-
-
-
-EMAIL HARVESTING WITH THEHARVESTER
-
-theHarvester is a tool designed for gathering emails and domain/subdomain names from different public sources.
-
-Command:
-
+# Email harvesting
 theHarvester -d example.com -b google,bing
 
-This command searches for emails and subdomains related to example.com using Google and Bing.
+# WAF detection
+wafw00f https://example.com
+```
 
-Sources available:
+---
 
-google, yahoo, bing, baidu, dogpile, pgp, linkedin, twitter, googleplus, etc.
+## 9) Ethics, data handling & notes
+
+- Passive recon is non-intrusive but can reveal sensitive operational details — **treat findings as confidential**.  
+- Document sources and timestamps for every finding.  
+- If you need to escalate to active techniques, obtain written authorization and update scope.  
+- Respect robots.txt and terms of service when using scraping tools.
+
+---
