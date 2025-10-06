@@ -174,14 +174,5 @@ nmap -Pn -sU -v <IP>
 nmap -oA scan_prefix -Pn -sV -sC -O <IP>
 ```
 
----
-
-## 7) Checklist / Next steps
-- [ ] Paste this file to `apuntes/assessment-methodologies/enumeration/active_information_gathering.md`  
-- [ ] Create `service-enumeration` notes and link them from this file  
-- [ ] Add examples of importing `-oX` results into Metasploit (`db_import`) in a how-to doc  
-- [ ] Add useful wordlists and scripts under `apuntes/tools/`
-
----
 
 **Security reminder:** Never run active scans outside authorized scope. Maintain approvals and handle discovered data securely.
