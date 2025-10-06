@@ -12,7 +12,6 @@ Active information gathering uses *direct* queries and network interactions to e
 4. Workflow & suggestions  
 5. Pitfalls, reliability & tuning  
 6. Quick cheat sheet  
-7. Checklist / Next steps
 
 ---
 
