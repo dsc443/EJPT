@@ -1,10 +1,4 @@
 # Active Information Gathering
-**Module:** Assessment Methodologies → Enumeration  
-**File:** active_information_gathering.md  
-**Date:** 2025-10-06  
-**Tags:** #enumeration #recon #dns #nmap #host-discovery
-
----
 
 ## Summary
 Active information gathering uses *direct* queries and network interactions to enumerate targets: DNS interrogation, zone transfers, host discovery and active port scanning. It is more intrusive than passive techniques, so **obtain written authorization** before running these techniques against non-lab networks.
